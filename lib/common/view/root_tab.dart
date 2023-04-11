@@ -1,5 +1,6 @@
 import 'package:actual/common/const/colors.dart';
 import 'package:actual/common/layout/default_layout.dart';
+import 'package:actual/restaurant/view/restaurant_screen.dart';
 import 'package:flutter/material.dart';
 
 class RootTab extends StatefulWidget {
@@ -9,8 +10,32 @@ class RootTab extends StatefulWidget {
   State<RootTab> createState() => _RootTabState();
 }
 
-class _RootTabState extends State<RootTab> {
+class _RootTabState extends State<RootTab> with SingleTickerProviderStateMixin {
+  // 나중에 이 값이 입력이 될 건데 이 값을 부를 때 선언이 되어 있을 것이다
+  late TabController controller;
   int index = 0;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    controller = TabController(length: 4, vsync: this);
+
+    controller.addListener(tabListener);
+  }
+
+  @override
+  void dispose() {
+    controller.removeListener(tabListener);
+    super.dispose();
+  }
+
+  void tabListener() {
+    setState(() {
+      index = controller.index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,9 +48,7 @@ class _RootTabState extends State<RootTab> {
         unselectedFontSize: 10,
         type: BottomNavigationBarType.fixed,
         onTap: (int index) {
-          setState(() {
-            this.index = index;
-          });
+          controller.animateTo(index);
         },
         currentIndex: index,
         items: const [
@@ -47,10 +70,27 @@ class _RootTabState extends State<RootTab> {
           ),
         ],
       ),
-      child: const Center(
-        child: Text(
-          'Root Tab',
-        ),
+      child: TabBarView(
+        physics: const NeverScrollableScrollPhysics(),
+        controller: controller,
+        children: [
+          const RestaurantScreen(),
+          Center(
+            child: Container(
+              child: const Text('음식'),
+            ),
+          ),
+          Center(
+            child: Container(
+              child: const Text('주문'),
+            ),
+          ),
+          Center(
+            child: Container(
+              child: const Text('프로필'),
+            ),
+          )
+        ],
       ),
     );
   }
